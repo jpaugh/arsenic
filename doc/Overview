@@ -1,0 +1,65 @@
+# Introduction
+
+Arsenic consists of a collection of packages working together to provide
+you with a comprehensive way to describe Haskell data in a textual
+form.
+
+Its primary format is JSON; YAML and XML may be supported later
+
+# Components
+
+## Typeable
+Defines a type representation which can be used to describe the type of
+most Haskell data types in a textual form. It is ported from
+Data.Typeable in the base library, but differs in that it exposes its
+type representation to client code.
+
+## Shuffle
+Marshalls data between Haskell and JSON. Since data is immutable in
+Haskell, it does not need to care about preserving references.
+
+
+### Later:
+- Existing Typeable instances should work. This probably requires an
+  indirect encoding, using the Data.Typable instance as an intermediary
+- Its JSON format can easily be translated to YAML using existing
+  tooling. XML may be supported later.
+- Support storing recursive objects. This requires some way to name and
+  reference objects.
+- It may benefit from noticing when objects are the same;
+  - When serializing, it could avoid the overhead of serializing when a
+    Haskell object implements Eq and is equal to a previously serialized
+    value. The merits of this are dubious, and this will always be
+    optional
+  - When deserializing, it could save memory in the caller by caching
+    Haskell objects as it builds them, and re-using the same one if
+    its JSON equivalent matches.
+
+## Pack
+A high-level API for describing, storing, and rebuilding large,
+interconnected data sets, such as is found with the complex models
+required for game development, using a storage format which lends itself
+to reading and editing manually.
+
+In the storage format, objects will be organized in libraries which are
+chosen according to the domain at hand. For example, an RPG might store
+every map in one library, and every type of enemy in another; still
+another library might store the data for every NPC.
+
+Individual objects can be named and referenced by name across library
+boundaries. Returning to the RPG above for an example, a certain NPC
+might appear at a specific location on two maps. That information can be
+stored in the map library as a coordinate and a reference to the NPC by
+name. This allows us to store the NPC in a separate library, and to
+describe it in only one place.
+
+### Later
+- Note: This could support storing recursive objects, even if the
+  underlying Shuffle storage format doesn't, by breaking apart the
+  recursion using a fixed-point operator. I don't know whether recursion
+  could be auto-detected, or whether a fixed-point operator could be
+  automatically generated
+- Create C and C# bindings. This is a great solution for any game
+  developers out there, regardless of language or platform!
+- On that note, make it as portable as possible, with builds for Linux,
+  Windows and Mac
